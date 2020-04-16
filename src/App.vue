@@ -1,19 +1,20 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <m-header></m-header>
+    <keep-alive><router-view/></keep-alive>
+    <tab></tab> <!--路由导航-->
   </div>
 </template>
-
-<style lang="stylus">
-#app
-  font-family Avenir, Helvetica, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
-  text-align center
-  color #2c3e50
-  margin-top 60px
+<script>
+  import MHeader from 'components/m-header/MHeader'
+  import Tab from 'components/tab/Tab'
+  export default {
+    components: {
+      MHeader,
+      Tab
+    }
+  }
+</script>
+<style lang="stylus" scoped rel="stylesheet/stylus">
+  @import "~common/stylus/variable"
 </style>
