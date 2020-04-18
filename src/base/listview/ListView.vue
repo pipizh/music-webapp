@@ -1,11 +1,12 @@
 <template>
   <scroll class='list-view' :data='data' ref='listView'
-  :listenScroll='listenScroll' @scroll='scroll' :probeType='probeType'>
+  :listen-scroll='listenScroll' @scroll='scroll' :probe-type='probeType'>
     <ul>
       <li v-for='(group, i) in data' :key='i' class='list-group' ref='listGroup'>
         <h2 class='list-group-title'>{{group.title}}</h2>
         <ul>
-          <li v-for='(item, j) in group.items' :key='j' class='list-group-item'>
+          <li v-for='(item, j) in group.items' :key='j' class='list-group-item' 
+          @click='selected(item)'>
             <img v-lazy="item.avatar" class='avatar'>
             <span class="name">{{item.name}}</span>
           </li>
@@ -83,6 +84,9 @@
 
         this._scrollTo(anchorIndex)
       },
+      refresh() {
+        this.$refs.listView.refresh()
+      },
       scroll(pos) {
         this.scrollY = pos.y
       },
@@ -113,6 +117,9 @@
           height += item.clientHeight
           this.listHeight.push(height)
         }
+      },
+      selected(item) {
+        this.$emit('selected', item)
       }
     },
     watch: {

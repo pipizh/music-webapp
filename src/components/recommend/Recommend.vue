@@ -1,5 +1,5 @@
 <template>
-  <div class='recommend'>
+  <div class='recommend' ref='recommend'>
     <scroll class="recommend-content" :data='discList' ref='scroll'>
       <div><!-- 外层创建一个div元素包裹内部的需滚动区域-->
         <div class="slider-wrapper" v-if="recommends.length"> <!-- 获取数据延迟，设置立刻渲染 -->
@@ -39,8 +39,10 @@ import {ERR_OK} from 'api/config'
 import Slider from 'base/slider/Slider'
 import Scroll from 'base/scroll/Scroll'
 import Loading from 'base/loading/Loading'
+import {playlistMixin} from 'common/js/mixin'
 
 export default {
+  mixins: [playlistMixin],
   data() {
     return {
       recommends: [],
@@ -55,6 +57,11 @@ export default {
     this._getDiscList()
   },
   methods: {
+    handlePlaylist(playlist) {
+      const bottom = playlist.length > 0 ? '60px' : ''
+      this.$refs.recommend.style.bottom = bottom
+      this.$refs.scroll.refresh()
+    },
     _getRecommend() {
       // getRecommend().then(res => {
       //   console.log(res)

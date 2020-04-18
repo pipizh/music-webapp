@@ -1,21 +1,3 @@
-// const express = require('express')
-// const axios =require('axios')
-// const app = express()
-// let apiRoutes = express.Router()
-// apiRoutes.get('/getDiscList', function(req, res) {
-//   let url = 'http://c.y.qq.com/splcloud.fcgi-bin/fcg_get_diss_by_tag.fcg'
-//   axios.get(url, {
-//     headers: {
-//       referer: 'https://c.y.qq.com/',
-//       host: 'c.y.qq.com'
-//     },
-//     param: req.query
-//   }).then(response => {
-//     res.json(response.data)
-//   }).catch(err => console.log(err))
-// })
-// app.use('/api', apiRoutes)
-
 module.exports = {
   configureWebpack: {
     resolve: {
@@ -49,6 +31,28 @@ module.exports = {
           '^/api/getDiscList': '' // 这里理解成用'/api/getDiscList'代替target的地址
         }
       },
+      // '/api/getPlaySongVkey': {
+      //   target: 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg',
+      //   secure: false, 
+      //   bypass: (req, res, proxyOptions) => {
+      //     req.headers.referer = "https://i.y.qq.com/n2/m/share/details/taoge.html?ADTAG=myqq&from=myqq&channel=10007100&id=7256912512"
+      //   },
+      //   pathRewrite: {
+      //     '^/api/getPlaySongVkey': ''
+      //   }
+      // },
+      '/api/getLyric': {
+        target: 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg',
+        secure: false, 
+        bypass: (req, res, proxyOptions) => {
+          req.headers.referer = "https://c.y.qq.com/"
+          req.headers.host = "c.y.qq.com"
+        },
+        pathRewrite: {
+          '^/api/getLyric': ''
+        }
+      },
+
     }
   }
 }
