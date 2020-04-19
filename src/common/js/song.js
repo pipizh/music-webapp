@@ -1,9 +1,9 @@
-import {getLyric} from 'api/song'
+import {getLyric, getPlaySongVkey} from 'api/song'
 import {ERR_OK} from 'api/config'
 import {Base64} from 'js-base64'
 
 export default class Song {
-  constructor({id, mid, singer, name, album, duration, image, url}) {
+  constructor({id, mid, singer, name, album, duration, image}) {
     this.id = id
     this.mid = mid
     this.singer = singer
@@ -11,9 +11,8 @@ export default class Song {
     this.album = album
     this.duration = duration
     this.image = image
-    this.url = url
   }
-
+  
   getLyric() {
     if (this.lyric) {
       return Promise.resolve(this.lyric)
@@ -30,6 +29,23 @@ export default class Song {
       })
     })
   }
+
+  // getUrl() {
+  //   if (this.url) {
+  //     return Promise.resolve(this.url)
+  //   }
+
+  //   return new Promise((resolve, reject) => {
+  //     getPlaySongVkey(this.mid).then(vkey => {
+  //       if(vkey.length !== 0) {
+  //         this.url = `http://ws.stream.qqmusic.qq.com/C400${this.mid}.m4a?fromtag=0&guid=126548448&vkey=${vkey}`
+  //         resolve(this.url)
+  //       } else {
+  //         reject('no url')
+  //       }
+  //     })
+  //   })
+  // }
 }
 
 export function createSong(musicData) {
@@ -41,7 +57,6 @@ export function createSong(musicData) {
     album: musicData.albumname,
     duration: musicData.interval,
     image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
-    // url: 'http://110.52.197.25/amobile.music.tc.qq.com/C400002q83Sd2G7Y7D.m4a?guid=5976381156&vkey=F186874B03C1F5838D9493DFCD6BB2CF28A71933775AFC23462EFAB120BB22605F929D85FFE064365C93AFF232081A197FE7A17F969004DB&uin=0&fromtag=38'
   })
 }
 

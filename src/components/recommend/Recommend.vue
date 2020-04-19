@@ -30,11 +30,13 @@
         <loading></loading>
       </div>
     </scroll>
+    <keep-alive><router-view></router-view></keep-alive>
   </div>
 </template>
 
 <script>
 import {getRecommend, getDiscList} from 'api/recommend'
+import {mapMutations} from 'vuex'
 import {ERR_OK} from 'api/config'
 import Slider from 'base/slider/Slider'
 import Scroll from 'base/scroll/Scroll'
@@ -99,7 +101,14 @@ export default {
         this.$refs.scroll.refresh()
         this.checkLoaded = true
       }
-    }
+    },
+    selectItem(item) {
+      this.$router.push(`recommend/${item.dissid}`)
+      this.setDisc(item)
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    })
   },
   components: {
     Slider,

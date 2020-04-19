@@ -88,8 +88,8 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @play="ready" @error='error' @timeupdate="updateTime"
-    @ended='end'></audio>
+    <audio ref="audio" @play="ready" @error="error" @timeupdate="updateTime"
+           @ended="end"></audio>
   </div>
 </template>
 
@@ -103,6 +103,7 @@
   import {prefixStyle} from 'common/js/dom'
   import {playMode} from 'common/js/config'
   import {shuffle} from 'common/js/util'
+  import {getPlaySongVkey} from 'api/song'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
@@ -116,7 +117,8 @@
         currentLyric: null,
         currentLineNum: 0,
         currentShow: 'cd',
-        playingLyric: ''
+        playingLyric: '',
+        currentUrl: ''
       }
     },
     computed: {
@@ -233,6 +235,7 @@
         if(this.currentLyric) this.currentLyric.seek(0)
       },
       prev() {
+        this.$refs.audio.src = ''
         if(!this.songReady) return
         if(this.playlist.length === 1) this.loop()
         else {
@@ -244,6 +247,7 @@
         this.songReady = false
       },
       next() {
+        this.$refs.audio.src = ''
         if(!this.songReady) return
         if(this.playlist.length === 1) this.loop()
         else {
@@ -311,6 +315,15 @@
           this.currentLyric = null
           this.playingLyric = ''
           this.currentLineNum = 0
+        })
+      },
+      getUrl() {
+        getPlaySongVkey(this.currentSong.mid).then(vkey => {
+          if(vkey.length !== 0) {
+            const url = `http://ws.stream.qqmusic.qq.com/C400${this.currentSong.mid}.m4a?fromtag=0&guid=126548448&vkey=${vkey}`
+            this.$refs.audio.src = url
+            this.$refs.audio.play()
+          } 
         })
       },
       handleLyric({lineNum, txt}) {
@@ -397,7 +410,7 @@
     },
     watch: {
       playing(newPlaying) {
-        this.$nextTick(() => {  // 播放地址的key目前拿不到
+        this.$nextTick(() => {  
           const audio = this.$refs.audio
           newPlaying ? audio.play() : audio.pause()
         })
@@ -407,9 +420,16 @@
         if(this.currentLyric) this.currentLyric.stop()
         // 保证手机微信从后台切换到前台时，歌曲可以重新进行播放
         setTimeout(() => {
-          this.$refs.audio.play()
+          this.getUrl()
           this.getLyric()
         }, 1000);
+      },
+      fullScreen(newVal) {
+        if (newVal) {
+          setTimeout(() => {
+            this.$refs.lyricList.refresh()
+          }, 20)
+        }
       }
     },
     components: {

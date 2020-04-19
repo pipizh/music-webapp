@@ -5,12 +5,17 @@ import Recommend from 'components/recommend/Recommend'
 import Search from 'components/search/Search'
 import Singer from 'components/singer/Singer'
 import SingerDetail from 'components/singer-detail/SingerDetail'
+import Disc from 'components/disc/Disc'
 
 Vue.use(VueRouter)
 
 const routes = [
   { path: '/', redirect: '/recommend' },
-  { path: '/recommend', component: Recommend },
+  { path: '/recommend', component: Recommend, 
+    children: [
+      {path: '/recommend/:id', component: Disc}
+    ]
+  },
   { path: '/singer', component: Singer,
     children: [
       {path: '/singer/:id', component: SingerDetail}

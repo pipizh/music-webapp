@@ -30,22 +30,21 @@ export function getLyric(mid) {
   })
 }
 
-// export function getPlaySongVkey(songmid) {
-//   const url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
+// 获取歌曲的vkey
+export function getPlaySongVkey(songmid) {
+  const url = '/api/getPlaySongVkey'
+  const data = Object.assign({}, {
+    format: 'json205361747',
+    platform: 'yqq',
+    cid: 205361747,
+    songmid,
+    filename: `C400${songmid}.m4a`,
+    guid: 126548448,
+  })
 
-//   const data = Object.assign({}, commonParams, {
-//     g_tk: 195219765,
-//     loginUin :1297716249, //可以传空值
-//     hostUin: 0,
-//     notice: 0,
-//     platform: 'yqq',
-//     needNewCode: 0,
-//     cid: 205361747,
-//     uin: 0, //可以传空值
-//     songmid,
-//     filename: `C400${songmid}.m4a`,
-//     guid: 5976381156
-//   })
-
-//   return jsonp(url, data, options)
-// }
+  return axios.get(url, {
+    params: data
+  }).then( res => {
+    return Promise.resolve(res.data.data.items[0].vkey)
+  })
+}

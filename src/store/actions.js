@@ -1,6 +1,7 @@
 import * as types from './mutation-types'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
+import {gerUrl} from 'common/js/song'
 
 function findIndex(list, song) {
   return list.findIndex(item => item.id === song.id)

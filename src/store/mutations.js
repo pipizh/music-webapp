@@ -22,8 +22,8 @@ const mutations = {
   [types.SET_CURRENT_INDEX](state, index) {
     state.currentIndex = index
   },
-  [types.SET_PLAYLIST_URL](state, {index, url}) {
-    state.playlist[index].url = url
+  [types.SET_DISC](state, disc) {
+    state.disc = disc
   }
 }
 export default mutations 

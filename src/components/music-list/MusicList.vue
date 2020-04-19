@@ -30,7 +30,6 @@
   import Loading from 'base/loading/Loading'
   import {mapActions, mapMutations} from 'vuex'
   import {prefixStyle} from 'common/js/dom'
-  import {getPlaySongVkey} from 'api/song'
   import {playlistMixin} from 'common/js/mixin'
 
   const RESERVED_HEIGHT = 40
@@ -89,34 +88,16 @@
           list: this.songs,
           index
         })
-
-        // getPlaySongVkey(item.mid).then(vkey => {
-        //   console.log(vkey)
-        //   let url = `http://110.52.197.25/amobile.music.tc.qq.com/C400${item.mid}.m4a?guid=5976381156&vkey=${vkey}&uin=0&fromtag=38`
-        //   console.log(url)
-        // })
-        
-        this.setPlaylistUrl({
-          index,
-          url: 'http://110.52.197.25/amobile.music.tc.qq.com/C400002q83Sd2G7Y7D.m4a?guid=5976381156&vkey=F186874B03C1F5838D9493DFCD6BB2CF28A71933775AFC23462EFAB120BB22605F929D85FFE064365C93AFF232081A197FE7A17F969004DB&uin=0&fromtag=38'
-        })
       },
       random() {
         this.randomPlay({
           list: this.songs
         })
-        this.setPlaylistUrl({
-          index: 0,
-          url: 'http://110.52.197.25/amobile.music.tc.qq.com/C400002q83Sd2G7Y7D.m4a?guid=5976381156&vkey=F186874B03C1F5838D9493DFCD6BB2CF28A71933775AFC23462EFAB120BB22605F929D85FFE064365C93AFF232081A197FE7A17F969004DB&uin=0&fromtag=38'
-        })
       },
       ...mapActions([
         'selectPlay',
         'randomPlay'
-      ]),
-      ...mapMutations({
-        setPlaylistUrl: 'SET_PLAYLIST_URL'
-      })
+      ])
     },
     watch: {
       scrollY(newVal) {
