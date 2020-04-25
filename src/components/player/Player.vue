@@ -88,7 +88,7 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" @play="ready" @error="error" @timeupdate="updateTime"
+    <audio ref="audio" @canplay="ready" @timeupdate="updateTime"
            @ended="end"></audio>
   </div>
 </template>
@@ -118,7 +118,6 @@
         currentLineNum: 0,
         currentShow: 'cd',
         playingLyric: '',
-        currentUrl: ''
       }
     },
     computed: {
@@ -235,35 +234,36 @@
         if(this.currentLyric) this.currentLyric.seek(0)
       },
       prev() {
-        this.$refs.audio.src = ''
         if(!this.songReady) return
-        if(this.playlist.length === 1) this.loop()
+        if(this.mode === playMode.loop) this.loop()
         else {
           let index = this.currentIndex - 1
           if(index === -1) index = this.playlist.length - 1
           this.setCurrentIndex(index)
           if(!this.playing) this.togglePlaying()
+          this.songReady = false
         }
-        this.songReady = false
       },
       next() {
-        this.$refs.audio.src = ''
+        // this.$refs.audio.src = ''
         if(!this.songReady) return
-        if(this.playlist.length === 1) this.loop()
+        console.log('next')
+        if(this.mode === playMode.loop) this.loop()
         else {
           let index = this.currentIndex + 1
           if(index === this.playlist.length) index = 0
           this.setCurrentIndex(index)
           if(!this.playing) this.togglePlaying()
+          this.songReady = false
         }
-        this.songReady = false
       },
       ready() {
         this.songReady = true
       },
-      error() {
-        this.songReady = true     // 保证正常使用
-      },
+      // 视频加载发生错误时触发
+      // error() {
+      //   this.songReady = true     // 保证正常使用
+      // },
       updateTime(e) {
         this.currentTime =  e.target.currentTime
       },
@@ -319,9 +319,11 @@
       },
       getUrl() {
         getPlaySongVkey(this.currentSong.mid).then(vkey => {
+          console.log(vkey)
           if(vkey.length !== 0) {
             const url = `http://ws.stream.qqmusic.qq.com/C400${this.currentSong.mid}.m4a?fromtag=0&guid=126548448&vkey=${vkey}`
             this.$refs.audio.src = url
+            console.log(this.$refs.audio)
             this.$refs.audio.play()
           } 
         })
@@ -416,13 +418,17 @@
         })
       },
       currentSong(newSong, oldSong) {
+        if(this.$refs.audio) {
+          this.$refs.audio.src = ''
+        } // refs只在组件渲染完成之后生效，第一次监听变化时audio未渲染，但是第一次的src为空，所以不妨碍结果
         if(newSong.id === oldSong.id) return
         if(this.currentLyric) this.currentLyric.stop()
         // 保证手机微信从后台切换到前台时，歌曲可以重新进行播放
         setTimeout(() => {
+          console.log('1')
           this.getUrl()
           this.getLyric()
-        }, 1000);
+        }, 1000)
       },
       fullScreen(newVal) {
         if (newVal) {

@@ -33,14 +33,14 @@ export function getLyric(mid) {
 // 获取歌曲的vkey
 export function getPlaySongVkey(songmid) {
   const url = '/api/getPlaySongVkey'
-  const data = Object.assign({}, {
+  const data = {
     format: 'json205361747',
     platform: 'yqq',
     cid: 205361747,
     songmid,
     filename: `C400${songmid}.m4a`,
     guid: 126548448,
-  })
+  }
 
   return axios.get(url, {
     params: data

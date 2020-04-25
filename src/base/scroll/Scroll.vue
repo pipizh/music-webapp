@@ -23,6 +23,14 @@ import BScroll from 'better-scroll'
       listenScroll: {
         type: Boolean,
         default: false
+      },
+      pullup: {
+        type: Boolean,
+        default: false
+      },
+      beforeScroll: {
+        type: Boolean,
+        default: false
       }
     },
     mounted() {
@@ -33,6 +41,7 @@ import BScroll from 'better-scroll'
     methods: {
       _initScroll() {
         if(!this.$refs.wrapper) return
+
         this.scroll =  new BScroll(this.$refs.wrapper, {
           probeType: this.probeType,
           click: this.click,
@@ -43,6 +52,18 @@ import BScroll from 'better-scroll'
           // 参数：{Object} {x, y} 滚动的实时坐标，触发时机：滚动过程中，具体时机取决于选项中的 probeType。
           this.scroll.on('scroll', pos => {
             this.$emit('scroll', pos)
+          })
+        }
+        if (this.pullup) {
+          this.scroll.on('scrollEnd', () => {
+            if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+              this.$emit('scrollToEnd')
+            }
+          })
+        }
+        if(!this.beforeScroll) {
+          this.scroll.on('beforeStartScroll', () => {
+            this.$emit('beforeScroll')
           })
         }
       },

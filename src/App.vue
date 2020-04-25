@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <m-header></m-header>
-    <keep-alive><router-view/></keep-alive>
     <tab></tab> <!--路由导航-->
+    <keep-alive><router-view/></keep-alive>
     <player></player>
   </div>
 </template>

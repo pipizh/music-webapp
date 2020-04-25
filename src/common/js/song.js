@@ -1,4 +1,4 @@
-import {getLyric, getPlaySongVkey} from 'api/song'
+import {getLyric} from 'api/song'
 import {ERR_OK} from 'api/config'
 import {Base64} from 'js-base64'
 
@@ -29,23 +29,6 @@ export default class Song {
       })
     })
   }
-
-  // getUrl() {
-  //   if (this.url) {
-  //     return Promise.resolve(this.url)
-  //   }
-
-  //   return new Promise((resolve, reject) => {
-  //     getPlaySongVkey(this.mid).then(vkey => {
-  //       if(vkey.length !== 0) {
-  //         this.url = `http://ws.stream.qqmusic.qq.com/C400${this.mid}.m4a?fromtag=0&guid=126548448&vkey=${vkey}`
-  //         resolve(this.url)
-  //       } else {
-  //         reject('no url')
-  //       }
-  //     })
-  //   })
-  // }
 }
 
 export function createSong(musicData) {

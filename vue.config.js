@@ -64,6 +64,18 @@ module.exports = {
           '^/api/getSongList': ''
         }
       },
+      // 推荐页歌单的全部歌曲代理
+      '/api/search': {
+        target: 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp',
+        secure: false, 
+        bypass: (req, res, proxyOptions) => {
+          req.headers.referer = "https://c.y.qq.com/"
+          req.headers.host = "c.y.qq.com"
+        },
+        pathRewrite: {
+          '^/api/search': ''
+        }
+      },
     }
   }
 }

@@ -6,6 +6,7 @@ import Search from 'components/search/Search'
 import Singer from 'components/singer/Singer'
 import SingerDetail from 'components/singer-detail/SingerDetail'
 import Disc from 'components/disc/Disc'
+import TopList from 'components/top-list/TopList'
 
 Vue.use(VueRouter)
 
@@ -21,8 +22,16 @@ const routes = [
       {path: '/singer/:id', component: SingerDetail}
     ]
   },
-  { path: '/search', component: Search },
-  { path: '/rank', component: Rank },
+  { path: '/search', component: Search,
+    children: [
+      {path: '/singer/:id', component: SingerDetail}
+    ] 
+  },
+  { path: '/rank', component: Rank,
+    children: [
+      {path: '/rank/:id', component: TopList}
+    ]
+  },
 ]
 
 const router = new VueRouter({
