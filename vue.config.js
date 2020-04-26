@@ -34,7 +34,8 @@ module.exports = {
       },
       // vkey代理
       '/api/getPlaySongVkey': {
-        target: 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg',
+        // target: 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg',
+        target: 'https://u.y.qq.com/cgi-bin/musicu.fcg',
         secure: false, 
         pathRewrite: {
           '^/api/getPlaySongVkey': ''

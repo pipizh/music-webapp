@@ -4,7 +4,7 @@
       <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
     <div ref="shortcutWrapper" class="shortcut-wrapper" v-show="!query">
-      <scroll ref="shortcut" class="shortcut" :data='shortcut'>
+      <scroll ref="shortcut" class="shortcut" :data='shortcut' :refreshDelay='refreshDelay'>
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
@@ -41,26 +41,28 @@
   import Confirm from 'base/confirm/Confirm'
   import {getHotKey} from 'api/search'
   import {ERR_OK} from 'api/config'
-  import {mapActions, mapGetters} from 'vuex'
-  import {playlistMixin} from 'common/js/mixin'
+  import {mapActions} from 'vuex'
+  import {playlistMixin, searchMixin} from 'common/js/mixin'
   export default {
-    mixins: [playlistMixin],
+    mixins: [playlistMixin, searchMixin],
     created() {
       this._getHotKey()
     },
     data() {
       return {
         hotKey: [],
-        query: '',
       }
     },
     methods: {
       handlePlaylist(playlist) {
-        const bottom = playlist > 0? '60px': ''
-        this.$refs.shortcutWrapper.style.bottom = bottom
+        console.log('refresh')
+        const bottom = playlist.length > 0 ? '60px' : ''
+
         this.$refs.searchResult.style.bottom = bottom
-        this.$refs.shortcut.refresh()
         this.$refs.suggest.refresh()
+
+        this.$refs.shortcutWrapper.style.bottom = bottom
+        this.$refs.shortcut.refresh()
       },
       _getHotKey() {
         getHotKey().then(res => {
@@ -69,25 +71,10 @@
           }
         })
       },
-      addQuery(query) {
-        this.$refs.searchBox.setQuery(query)
-      },
-      onQueryChange(query) {
-        this.query = query
-      },
-      // 手机端设置滑动列表时，输入框失去焦点，键盘会收起
-      blurInput() {
-        this.$refs.searchBox.blur()
-      },
-      saveSearch() {
-        this.saveSearchHistory(this.query)
-      },
       showConfirm() {
         this.$refs.confirm.show()
       },
       ...mapActions([
-        'saveSearchHistory',
-        'deleteSearchHistory',
         'clearSearchHistory'
       ])
     },
@@ -95,9 +82,6 @@
       shortcut() {
         return this.hotKey.concat(this.searchHistory)
       },
-      ...mapGetters([
-        'searchHistory'
-      ])
     },
     watch: {
       query(newQuery) {

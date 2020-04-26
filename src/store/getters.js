@@ -12,5 +12,7 @@ const getters = {
   disc: state => state.disc,
   topList: state => state.topList,
   searchHistory: state => state.searchHistory,
+  playHistory: state => state.playHistory,
+  favoriteList: state => state.favoriteList
 }
 export default getters

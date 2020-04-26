@@ -55,14 +55,15 @@
             <div class="icon i-left" :class='disableCls'>
               <i @click='prev' class="icon-prev"></i>
             </div>
-            <div class="icon i-center"  :class='disableCls'>
-              <i @click='togglePlaying'  :class="playIcon"></i>
+            <div class="icon i-center" :class='disableCls'>
+              <i @click='togglePlaying' :class="playIcon"></i>
             </div>
-            <div class="icon i-right"  :class='disableCls'>
+            <div class="icon i-right" :class='disableCls'>
               <i @click='next' class="icon-next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon"></i>
+              <i class="icon" :class='getFavoriteIcon(currentSong)'
+              @click='toggleFavorite(currentSong)'></i>
             </div>
           </div>
         </div>
@@ -77,7 +78,7 @@
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
-        <div class="control">
+        <div class="control" >
           <progress-circle :radius='radius' :percent='percent'>
             <i :class='playMiniIcon' class='icon-mini' @click.stop='togglePlaying'></i>
           </progress-circle>
@@ -88,27 +89,31 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" @canplay="ready" @timeupdate="updateTime"
+    <playlist ref='playlist'></playlist>
+    <audio ref="audio" @play="ready" @timeupdate="updateTime"
            @ended="end"></audio>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters, mapMutations} from 'vuex'
+  import {mapGetters, mapMutations, mapActions} from 'vuex'
   import Scroll from 'base/scroll/Scroll'
   import ProgressBar from 'base/progress-bar/ProgressBar'
   import ProgressCircle from 'base/progress-circle/ProgressCircle'
+  import Playlist from 'components/playlist/Playlist'
   import animations from 'create-keyframe-animation'
   import Lyric from 'lyric-parser'
   import {prefixStyle} from 'common/js/dom'
   import {playMode} from 'common/js/config'
   import {shuffle} from 'common/js/util'
   import {getPlaySongVkey} from 'api/song'
+  import {playerMixin} from 'common/js/mixin'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
 
   export default {
+    mixins: [playerMixin],
     data() {
       return {
         songReady: false,  // 标志位做限制，防止快速点击导致dom异常
@@ -122,13 +127,9 @@
     },
     computed: {
       ...mapGetters([
-        'playlist',
         'fullScreen',
-        'currentSong',
         'playing',
         'currentIndex',
-        'mode',
-        'sequenceList'
       ]),
       // 动态类名
       // 实现cd旋转
@@ -146,9 +147,6 @@
       },
       percent() {
         return this.currentTime / this.currentSong.duration
-      },
-      iconMode() {
-        return this.mode === playMode.sequence? 'icon-sequence': this.mode === playMode.loop? 'icon-loop': 'icon-random'
       }
     },
     created() {
@@ -221,7 +219,7 @@
       },
       togglePlaying() {
         if(!this.songReady) return
-        this.setPlaying(!this.playing)
+        this.setPlayingState(!this.playing)
         if(this.currentLyric) this.currentLyric.togglePlay()
       },
       end() {
@@ -235,7 +233,9 @@
       },
       prev() {
         if(!this.songReady) return
-        if(this.mode === playMode.loop) this.loop()
+        if(this.mode === playMode.loop || this.playlist.length === 1) {
+          this.loop()
+        }
         else {
           let index = this.currentIndex - 1
           if(index === -1) index = this.playlist.length - 1
@@ -248,7 +248,9 @@
         // this.$refs.audio.src = ''
         if(!this.songReady) return
         console.log('next')
-        if(this.mode === playMode.loop) this.loop()
+        if(this.mode === playMode.loop || this.playlist.length === 1) {
+          this.loop()
+        }
         else {
           let index = this.currentIndex + 1
           if(index === this.playlist.length) index = 0
@@ -258,7 +260,10 @@
         }
       },
       ready() {
+        // canplay：当文件就绪可以开始播放时运行的脚本（缓存已足够开始时）
+        // play：当媒介就绪可以开始播放时运行的脚本
         this.songReady = true
+        this.savePlayHistory(this.currentSong)
       },
       // 视频加载发生错误时触发
       // error() {
@@ -287,26 +292,11 @@
         if(!this.playing) this.togglePlaying()
         if(this.currentLyric) this.currentLyric.seek(time * 1000)
       },
-      changeMode() {
-        const mode = (this.mode + 1) % 3
-        this.setPlayMode(mode)
-        let list = null
-        if(this.mode === playMode.random) list = shuffle(this.sequenceList)
-        else list = this.sequenceList
-        this.resetCurrentIndex(list)
-        this.setPlayList(list)
-      },
-      resetCurrentIndex(list) {
-        let index = list.findIndex(item => {
-          return item.id === this.currentSong.id
-        })
-        this.setCurrentIndex(index)
-      },
       getLyric() {
         this.currentSong.getLyric().then((lyric) => {
-          if (this.currentSong.lyric !== lyric) {
-            return
-          }
+          // if (this.currentSong.lyric !== lyric) {
+          //   return
+          // }
           this.currentLyric = new Lyric(lyric, this.handleLyric)  
           if (this.playing) {
             this.currentLyric.play()
@@ -318,10 +308,10 @@
         })
       },
       getUrl() {
-        getPlaySongVkey(this.currentSong.mid).then(vkey => {
-          console.log(vkey)
-          if(vkey.length !== 0) {
-            const url = `http://ws.stream.qqmusic.qq.com/C400${this.currentSong.mid}.m4a?fromtag=0&guid=126548448&vkey=${vkey}`
+        getPlaySongVkey(this.currentSong.mid).then(purl => {
+          console.log(purl)
+          if(purl.length !== 0) {
+            const url = `http://ws.stream.qqmusic.qq.com/${purl}`
             this.$refs.audio.src = url
             console.log(this.$refs.audio)
             this.$refs.audio.play()
@@ -404,28 +394,41 @@
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
-        setPlaying: 'SET_PLAYING_STATE',
-        setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayMode: 'SET_PLAY_MODE',
-        setPlayList: 'SET_PLAYLIST'
-      })
+      }),
+      ...mapActions([
+        'savePlayHistory'
+      ])
     },
     watch: {
       playing(newPlaying) {
         this.$nextTick(() => {  
           const audio = this.$refs.audio
-          newPlaying ? audio.play() : audio.pause()
+          if(audio.src.length) {
+            newPlaying ? audio.play() : audio.pause()
+          }
         })
       },
       currentSong(newSong, oldSong) {
+        if(!newSong.id) {
+          return
+        }
+        if (newSong.id === oldSong.id) {
+          return
+        }
         if(this.$refs.audio) {
           this.$refs.audio.src = ''
         } // refs只在组件渲染完成之后生效，第一次监听变化时audio未渲染，但是第一次的src为空，所以不妨碍结果
-        if(newSong.id === oldSong.id) return
-        if(this.currentLyric) this.currentLyric.stop()
-        // 保证手机微信从后台切换到前台时，歌曲可以重新进行播放
-        setTimeout(() => {
-          console.log('1')
+        if(this.currentLyric) {
+          this.currentLyric.stop()
+          this.currentTime = 0
+          this.playingLyric = ''
+          this.currentLineNum = 0
+        }
+        this.songReady = false
+        console.log(this.songReady)
+        // 当歌曲在手机上播放，如果进入到后台，再切到前台的时候，
+        clearTimeout(this.timer) 
+        this.timer = setTimeout(() => {
           this.getUrl()
           this.getLyric()
         }, 1000)
@@ -441,7 +444,8 @@
     components: {
       Scroll,
       ProgressBar,
-      ProgressCircle
+      ProgressCircle,
+      Playlist
     }
   }
 </script>

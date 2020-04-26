@@ -107,6 +107,7 @@ export const searchMixin = {
     onQueryChange(query) {
       this.query = query
     },
+    // 手机端设置滑动列表时，输入框失去焦点，键盘会收起
     blurInput() {
       this.$refs.searchBox.blur()
     },
